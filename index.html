@@ -369,9 +369,8 @@ QGIS community whom might unfamiliar with node.js and javascript framework/ buil
 ## qgis_v_{{ qgisversion }}
 <span v-for="tag in selected">
 ## pqs_{{ tag.replace(" ", "-") }}</span>
-<span v-for="tag in inclusionsArray">
-## pqs_{{ tag.replace(" ", "-") }}</span>
-
+<span v-if="inclusionsArray"><span v-for="tag in inclusionsArray">## pqs_{{ tag.replace(" ", "-") }}
+</span></span>
 __author__ = "{{ author }}"
 __version__ = "{{ scriptversion }}"
 __license__ = "{{ license }}"
@@ -417,7 +416,12 @@ __license__ = "{{ license }}"
       },
       computed: {
         inclusionsArray () {
-          return this.inclusions.split(" ")
+          if (this.inclusions) {
+            arr = this.inclusions.split(" ")
+          } else {
+            arr = null
+          }
+          return arr
         }
       },
       methods: {
