@@ -1,1 +1,675 @@
-Coming Soon...
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+  <!-- https://wikiki.github.io/elements/pageloader/ -->
+  <link rel="stylesheet" href="bulma-pageloader.min.css">
+  <title>PyQgists</title>
+  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.3.45/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <!-- ClipboardJS -->
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+  <style>
+  body a {
+    color: #000000
+  }
+  .captilized {
+    text-transform: capitalize;
+  }
+  .btn, .clipboard-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+  }
+  .btn .process-btn {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+  }
+  .code-snippet {
+    margin-top: 20px;
+    border-radius: 6px !important;
+    width: 100%;
+  }
+  .warning-notice {
+    color: #770000;
+    font-size: 0.8em;
+    text-align: center;
+  }
+  .collapse-content {
+    padding: 20px
+  }
+  </style>
+
+</head>
+
+<!-- Architecture comments
+This uses vue and buefy in an atypical manner, in more of an "vanilla" html structure that is straight forward.
+Traditionally these frameworks will use a build platform with node.js rather than client side cdn scripts.
+This was done to facilitate collaboration and lower the barrier for entry for other developers in the
+QGIS community whom might unfamiliar with node.js and javascript framework/ build tools etc.
+-->
+
+<body>
+<div id="pageloader" class="pageloader is-active"style="background-color: #4a4a4a"><span class="title">Loading</span></div>
+  <div class="container">
+    <div id="app">
+      <section>
+        <b-navbar centered fixed-top type="is-dark">
+          <template slot="start">
+            <b-navbar-item @click="info">
+                <span><b-icon size="is-small" icon="information"></b-icon> PyQgist</span>
+            </b-navbar-item>
+          </template>
+          <template slot="end">
+            <b-navbar-item @click="notify">
+                <b-icon icon="lightbulb-on"></b-icon>
+            </b-navbar-item>
+          </template>
+        </b-navbar>
+      </section>
+      <section style="margin-top: 20px">
+        <div class="tile is-ancestor">
+          <div class="tile is-half is-vertical is-parent">
+          <div id="tag-tile" class="tile is-child box">
+              <b-collapse :open="true" aria-id="tag-collapsible-section">
+              <a class="collapse-title"
+                slot="trigger"
+                aria-controls="tag-collapsible-section">
+                <b-icon
+                  icon="tag"
+                  type="is-dark">
+                </b-icon>
+                <span class="title is-4"> Tags</span></a>
+                <div class="collapse-content">
+                  <div class="tile is-child">
+                    <div class="tile is-parent">
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li v-for="tag in primarytags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li v-for="tag in secondarytags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </b-collapse>
+            </div>
+            <div id="more-tile" class="tile is-child box">
+              <b-collapse :open="false" aria-id="more-collapsible-section">
+              <a class="collapse-title"
+                slot="trigger"
+                aria-controls="more-collapsible-section">
+                <b-icon
+                  icon="tag-multiple"
+                  type="is-dark">
+                </b-icon>
+                <span class="title is-4"> More tags</span></a>
+                <div class="collapse-content">
+                  <div class="tile is-child">
+                    <div class="tile is-parent">
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li>
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="maintags"
+                            native-value="pyqgis"
+                            >PyQgis</b-checkbox>
+                          </li>
+                          <li>
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="maintags"
+                            native-value="pyqgist"
+                            >PyQgist</b-checkbox>
+                          </li>
+                          <li>
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="maintags"
+                            native-value="python"
+                            >Python</b-checkbox>
+                          </li>
+                          <li>
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="maintags"
+                            native-value="qgis"
+                            >QGIS</b-checkbox>
+                          </li>
+                          <li v-for="tag in auxiliarytags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li v-for="tag in additionaltags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </b-collapse>
+            </div>
+            <div id="even-more-tile" class="tile is-child box">
+              <b-collapse :open="false" aria-id="even-more-collapsible-section">
+              <a class="collapse-title"
+                slot="trigger"
+                aria-controls="even-more-collapsible-section">
+                <b-icon
+                  icon="tag-plus"
+                  type="is-dark">
+                </b-icon>
+                <span class="title is-4"> Even more tags</span></a>
+                <div class="collapse-content">
+                  <div class="tile is-child">
+                    <div class="tile is-parent">
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li v-for="tag in extratags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="tile is-child is-horizontal">
+                        <ul class="captilized">
+                          <li v-for="tag in plustags">
+                            <b-checkbox
+                            type="is-dark"
+                            v-model="selected"
+                            :native-value="tag"
+                            :disabled="selected.length > 15 && selected.indexOf(tag) === -1"
+                            >{{ tag.replace("-", " ") }}</b-checkbox>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </b-collapse>
+            </div>
+            <div id="template-tile" class="tile is-child box">
+              <b-collapse :open="false" aria-id="template-collapsible-section">
+              <a class="collapse-title"
+                slot="trigger"
+                aria-controls="template-collapsible-section">
+                <b-icon
+                  icon="shape-plus"
+                  type="is-dark">
+                </b-icon>
+                <span class="title is-4"> Template</span></a>
+                <div class="collapse-content">
+                  <b-field label="Script Content" message="Add some custom content or modify the boilerplate methods">
+                    <b-input v-model="boilerplate" type="textarea"  rows="10"></b-input>
+                  </b-field>
+                  <b-field label="QGIS Version" message="Select the latest QGIS version that this script was tested or built on">
+                    <b-select :placeholder="qgisversion"
+                      v-model="qgisversion">
+                      <option v-for="version in versions"
+                        :value="version">
+                        {{ version }}
+                      </option>
+                    </b-select>
+                  </b-field>
+                  <b-field label="Inclusions" message="A space separated list of additional tags to add to the script">
+                    <b-input v-model="inclusions" type="textarea" rows="1"></b-input>
+                  </b-field>
+                  <b-field label="Shebang" message="Tell the system how to execute the script">
+                    <b-input v-model="shebang"></b-input>
+                  </b-field>
+                  <b-field label="Author">
+                    <b-input v-model="author"></b-input>
+                  </b-field>
+                  <b-field label="Version">
+                    <b-input v-model="scriptversion"></b-input>
+                  </b-field>
+                  <b-field label="License">
+                    <b-input v-model="license"></b-input>
+                  </b-field>
+                  <b-field label="Summary">
+                    <b-input v-model="summary"></b-input>
+                  </b-field>
+                  <b-field label="Docstring">
+                    <b-input v-model="docstring" type="textarea" rows="6"></b-input>
+                  </b-field>
+                  <b-field label="Imports">
+                    <b-input v-model="imports" type="textarea"></b-input>
+                  </b-field>
+                </div>
+              </b-collapse>
+            </div>
+            <div id="methods-tile" class="tile is-child box">
+              <b-collapse :open="false" aria-id="method-collapsible-section">
+              <a class="collapse-title"
+                slot="trigger"
+                aria-controls="method-collapsible-section">
+                <b-icon
+                  icon="file-document"
+                  type="is-dark">
+                </b-icon>
+                <span class="title is-4"> Methods</span></a>
+                <div class="collapse-content">
+                  <p><i>Custom methods and predefined boilerplate code.<br></i></p><br>
+                  <div class="tile is-child">
+                    <div class="tile is-parent">
+                      <ul class="captilized">
+                        <li v-for="item in methods">
+                          <b-radio v-model="boilerplate"
+                            :native-value="item.code"
+                            type="is-dark">
+                            {{ item.name }}
+                          </b-radio>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <p class="warning-notice"><i><b>WARNING: This will overwrite the existing script content</b></i></p>
+                </div>
+              </b-collapse>
+            </div>
+            <div id="search-tile" class="tile is-child box">
+              <b-collapse :open="false" aria-id="search-collapsible-section">
+                <a class="collapse-title"
+                  slot="trigger"
+                  aria-controls="search-collapsible-section">
+                  <b-icon
+                    icon="magnify-plus"
+                    type="is-dark">
+                  </b-icon>
+                  <span class="title is-4"> Search</span></a>
+                  <div class="collapse-content">
+                    <p><i>Search GitHub for shared gists that match your criteria using the following elements and paterns:</i></p><br>
+                    </b-field>
+                    <b-field label="Inclusions" message="A space separated list of additional tags to search for">
+                      <b-input v-model="inclusions" type="textarea" rows="1"></b-input>
+                    </b-field>
+                    <b-field label="Additions" message="A space separated list of tags to search for using the AND operator">
+                      <b-input v-model="additions" type="textarea" rows="1"></b-input>
+                    </b-field>
+                    <b-field label="Alternatives" message="A space separated list of tags to search for using the OR operator">
+                      <b-input v-model="alternatives" type="textarea" rows="1"></b-input>
+                    </b-field>
+                    <b-field label="Exclusions" message="A space separated list of tags to search for using the NOT operator">
+                      <b-input v-model="exclusions" type="textarea" rows="1"></b-input>
+                    </b-field>
+                    <div style="position: relative">
+                      <a class="btn process-btn" id="search-btn" @click="search">
+                        <b-button size="is-small"
+                          type="is-dark"
+                          icon-left="magnify">
+                          Search
+                        </b-button>
+                      </a>
+                    </div>
+                  </div>
+                </b-collapse>
+            </div>
+          </div>
+          <div class="tile is-parent">
+            <div id="code-window" class="tile is-half is-child box">
+              <p class="title is-4">Results</p>
+              <div class="code-snippet" style="position: relative">
+                <a class="clipboard-btn" id="clipboard-btn" data-clipboard-target=".template-code" @click="clipboard">
+                  <b-button size="is-small"
+                    type="is-light"
+                    icon-left="clipboard-text">
+                    Copy
+                  </b-button>
+                </a>
+                <pre><code class="template-code python" id="template-code">{{ shebang }}
+"""{{ summary }}
+
+{{ docstring }}
+"""
+<span v-for="tag in maintags">
+## {{ tag.replace(" ", "-") }}</span>
+## qgis_v_{{ qgisversion }}
+<span v-for="tag in selected">
+## pqs_{{ tag.replace(" ", "-") }}</span>
+<span v-for="tag in inclusionsArray">
+## pqs_{{ tag.replace(" ", "-") }}</span>
+
+__author__ = "{{ author }}"
+__version__ = "{{ scriptversion }}"
+__license__ = "{{ license }}"
+
+{{ imports }}
+
+{{ boilerplate }}
+</code></pre>
+
+              </div>
+              <p style="padding: 10px"></p>
+              <div class="gist-link" style="position: relative">
+                <a class="btn process-btn" id="gist-btn" @click="window.open('https://gist.github.com')">
+                  <b-button size="is-medium"
+                    pack="fas"
+                    type="is-dark"
+                    icon-left="github">
+                    GIST.GITHUB.COM
+                  </b-button>
+                </a>
+              </div>
+              <p style="padding: 20px"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<!-- Buefy AND Vue2 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      mounted: function () {
+        this.qgisversion = this.versions[this.versions.length-1]  // set default qgis version to latest
+        this.boilerplate = this.methods[0].code
+        setTimeout(function(){ 
+          document.getElementById("pageloader").classList.remove("is-active")
+        }, 1000)
+        console.log('V-DOM ready')
+      },
+      computed: {
+        inclusionsArray () {
+          return this.inclusions.split(" ")
+        }
+      },
+      methods: {
+        clipboard: function() {
+          var clipboard = new ClipboardJS('.clipboard-btn')
+          clipboard.on('success',function(e){e.clearSelection()})
+          clipboard.on('success',this.clipboardSuccess())
+          //clipboard.on('error',function(e){e.clearSelection()})
+          //clipboard.on('error',this.error())
+        },
+        notify() {
+          msg = this.msgs[Math.floor(Math.random() * this.msgs.length)]
+          this.$buefy.toast.open({
+            message: msg,
+            position: 'is-bottom',
+            type: 'is-info'})
+        },
+        clipboardSuccess() {
+          this.$buefy.toast.open({
+            duration: 2000,
+            message: '&#128203; Snippet Copied',
+            position: 'is-bottom',
+            type: 'is-success'
+          })},
+        error() {
+          this.$buefy.toast.open({
+            duration: 5000,
+            message: 'Task failed successfully &#128163;',
+            position: 'is-bottom',
+            type: 'is-danger'
+          })
+        },
+        toggle() {
+          this.$buefy.toast.open({
+            duration: 5000,
+            message: 'Window expansion not yet supported',
+            position: 'is-bottom',
+            type: 'is-dark'
+          })
+        },
+        search() {
+          console.log('search triggered')
+          searchuri = "https://gist.github.com/search?q="
+          var searchstring = ''
+          var defaulttags = this.maintags.join('+')
+          searchstring += defaulttags
+          var parentversion = 'qgis_v_'
+          parentversion += this.qgisversion.charAt(0)
+          searchstring += '+' + parentversion
+          var searchtags = this.selected.join('+pqs_')
+          searchstring += '+' + searchtags
+          searchuri += searchstring
+          if (this.inclusions.length > 0) {
+            searchuri += '+' + this.inclusions.replace(" ","+")
+          }
+          if (this.additions.length > 0) {
+            searchuri += ' AND ' + this.additions.replace(" ","+")
+          }
+          if (this.alternatives.length > 0) {
+            searchuri += ' OR ' + this.alternatives.replace(" ","+")
+          }
+          if (this.exclusions.length > 0) {
+            searchuri += ' NOT ' + this.exclusions.replace(" ","+")
+          }
+          if (searchuri.length > 256) {
+            searchuri = searchuri.substring(0,256)
+            this.error()
+            setTimeout(function(){ 
+              window.open(searchuri)
+            }, 1000)
+          } else {
+            window.open(searchuri)
+          }
+          console.log(searchuri)
+        },
+        info() {
+          this.$buefy.dialog.alert({
+            title: 'Information',
+            type: 'is-dark',
+            message: `PyQgist is a community project, which attempts 
+to provide a unified platform for the sharing and discovery 
+of PyQGIS scripts and code snippets. After much deliberation, 
+GitHub gists were identified as the best platform for sharing 
+short code snippets that are potentially useful, yet did not 
+warrant inclusion within the <a href="https://docs.qgis.org/latest/en/docs/pyqgis_developer_cookbook/">PyQGIS Developer Cookbook</a>.
+<br>
+<br>
+GitHub gists do not support tags or labels and have a limited 
+API for performing searches, which makes content discovery 
+very difficult, however as the needs of the community were 
+not met by existing platform services, the PyQgist templating 
+system was designed as an alternative. 
+<br>
+<br>
+To use this system, simply select the tags which you wish to 
+create a discoverable snippet for, and copy the resulting 
+template code for a new snippet on <a href="https://gist.github.com/">gist.github.com</a>
+<br>
+<br>
+Use the search function to construct a custom search query with 
+the GitHub Gists API in order to discover content that other 
+community members have created and shared using this tool.
+<br>
+<br>
+More resources are available from the <a href="https://github.com/zacharlie/awesome-pyqgis">awesome-pyqgis</a> list.
+Made with <b style="color: red">&#9829;</b> by the <a href="https://qgis.org/en/site/getinvolved/">QGIS Community</a>.`
+          })
+        }
+      },
+      data: {
+        maintags: ['pyqgis', 'pyqgist'],
+        inclusions: '',  // +
+        additions: '',  // AND
+        alternatives: '',  // OR
+        exclusions: '',  // NOT
+        stars: 0,  // stars:>100
+        fork:true, // fork:only
+        forks:0, // forks>3
+        username: '',  // user:zacharlie
+        anon: true,
+        gistsize: 0,  // size:>1000KB :n <n >=n n..m
+        pushdate: new Date('1970-01-01'),  // date of most recent modification // pushed:>2019-12-01
+        shebang: '#!/usr/bin/env python3',
+        author: 'QGIS Community',
+        scriptversion: '0.1.0',
+        license: 'MIT',
+        boilerplate: 'def function(var):\n  pass',
+        versions: [
+          '2.0',
+          '2.18',
+          '3.0',
+          '3.2',
+          '3.4',
+          '3.6',
+          '3.8',
+          '3.10',
+          '3.12',
+          '3.14',
+          '3.16',
+          '3.18'],
+        primarytags: [
+          'console',
+          'CLI',
+          'processing',
+          'general',
+          'UI',
+          'QGIS-Server',
+          'OGC',
+          'vector',
+          'raster',
+          'mesh',
+          'map-tools',
+          'analysis-tools',
+          'data-management',
+          'layers'],
+        secondarytags: [
+          'layouts',
+          'forms',
+          'labelling',
+          'symbology',
+          'expressions',
+          'widgets',
+          '3D',
+          'diagrams',
+          'digitising',
+          'temporal',
+          'profiles',
+          'settings'],
+        auxiliarytags: [
+          'gpkg',
+          'spatialite',
+          'postgresql',
+          'postgis',
+          'oracle',
+          'mssql',
+          'sqlite',
+          'DB2'],
+        additionaltags: [
+          'GDAL',
+          'GRASS',
+          'SAGA',
+          'R',
+          'INSPIRE',
+          'proj',
+          'WMS',
+          'WFS',
+          'WCS',
+          'WMTS',
+          'API'],
+        extratags: [
+          'geonode',
+          'mapserver',
+          'geoserver',
+          'geonetwork',
+          'pycsw',
+          'geomoose',
+          'lizmap',
+          'deegree',
+          'geos',
+          'geotools',
+          'Other'],
+        plustags: [
+          'openlayers',
+          'leaflet',
+          'linux',
+          'windows',
+          'mac',
+          'shell',
+          'cmd',
+          'powershell',
+          'zsh',
+          'bash'],
+        summary: 'This line should summarise the function of your script.',
+        docstring: `The summary line should only be one line long and on the same line
+as the opening quotes and should not be padded by spaces. This
+additional content is used to further describe the functions
+and instructions on it's use.`,
+        imports: `from qgis.core import *
+import qgis.utils`,
+        selected: ['console','main'],  // slected tags
+        qgisversion: '3',  // appropriate qgis version
+        methods: [
+          {key: 0,
+           name: "default",
+           code: `def main():
+    """ Work your magic """
+    print("hello world")
+
+
+if __name__ == "__main__":
+    """ Executed when calling script directly """
+    main()`},
+          {key: 1,
+           name: "primary",
+           code: `# DoSomething
+pass`},
+          {key: 2,
+           name: "secondary",
+           code: `# DoSomethingElse
+pass`}
+        ],
+        msgs: [
+          'QGIS ROCKS!',
+          'GIS FTW',
+          '&#128640; Ready to launch',
+          '&#128374; awesomest-awesome',
+          '&#128222; Quick win incoming',
+          'You\'re Spatial! &#127775;',
+          'Never give up!',
+          'YOU CAN DO IT',
+          'Shiver me timbers! &#127988;&#8205;&#9760;&#65039;',
+          'QGIS best GIS',
+          'Pancakes &#129374;']
+      }
+    })
+  </script>
+</body>
+</html>
