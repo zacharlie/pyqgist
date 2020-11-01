@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="bulma-pageloader.min.css">
   <title>PyQgists</title>
   <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.3.45/css/materialdesignicons.min.css">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"> -->
   <!-- ClipboardJS -->
   <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
   <style>
@@ -59,11 +59,15 @@ QGIS community whom might unfamiliar with node.js and javascript framework/ buil
       <section>
         <b-navbar centered fixed-top type="is-dark">
           <template slot="start">
-            <b-navbar-item @click="info">
-                <span><b-icon size="is-small" icon="information"></b-icon> PyQgist</span>
-            </b-navbar-item>
+            <b-navbar-item @click="location.reload(); ">PyQgist</b-navbar-item>
           </template>
           <template slot="end">
+            <b-navbar-item @click="info">
+                <b-icon icon="information"></b-icon>
+            </b-navbar-item>
+            <b-navbar-item @click="window.open('https://github.com/zacharlie/pyqgist')">
+                <b-icon icon="github"></b-icon>
+            </b-navbar-item>
             <b-navbar-item @click="notify">
                 <b-icon icon="lightbulb-on"></b-icon>
             </b-navbar-item>
@@ -382,7 +386,6 @@ __license__ = "{{ license }}"
               <div class="gist-link" style="position: relative">
                 <a class="btn process-btn" id="gist-btn" @click="window.open('https://gist.github.com')">
                   <b-button size="is-medium"
-                    pack="fas"
                     type="is-dark"
                     icon-left="github">
                     GIST.GITHUB.COM
