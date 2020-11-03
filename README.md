@@ -1,4 +1,4 @@
-# PyGgist
+# PyQgist
 
 A script template generator and content discovery framework for scripts which use the QGIS "PyQgis" API.
 
@@ -14,7 +14,7 @@ As not all scripts are created equal, they shouldn't be treated as such. The fol
 
 - [PyQgis Developer cookbook](https://docs.qgis.org/latest/en/docs/pyqgis_developer_cookbook): Various scripts, functions, templates and boilerplate code for performing common tasks used across various domains and adhering to the best practices as identified by QGIS.org and the core QGIS community.
 - Curated content: As the content, quality, design and function of scripts may vary, individual developers may prefer to keep their own "curated collections" of scripts which perform a specific subset of actions, fill some industry specific purpose or adhere to a particular standard. As these requirements are typically rather subjective, they are handled by each developer independantly, but a centralised list for discovering these repositories is available from [awesome-pyqgis](https://github.com/zacharlie/awesome-pyqgis).
-- [PyQgist](https://github.com/zacharlie/pyqgist): The bizarre, where users can share and discover code snippets by using [GitHub Gists](https://gist.github.com/) as a backend. The app simply provides some default tags and templates that conform to a standardised structure in oreder to help with consistency, as well as providing a simple search function which will prepopulate the GitHub search functionality and assist with code discovery.
+- [PyQgist](https://github.com/zacharlie/pyqgist): The [bazaar](https://en.wikipedia.org/wiki/The_Cathedral_and_the_Bazaar), where users can share and discover code snippets by using [GitHub Gists](https://gist.github.com/) as a backend. The app simply provides some default tags and templates that conform to a standardised structure in oreder to help with consistency, as well as providing a simple search function which will prepopulate the GitHub search functionality and assist with code discovery.
 - [GeoGist](https://github.com/zacharlie/geogist): PyQgist is intended sctrictly for snippets that use the QGIS Python (PyQgis) API, however users who wish to share and discover snippets for other spatial operations, such as PostGIS procedures, ArcPy scripts, or even shell scripts that are useful in a spatial data management context, can use the GeoGist application instead.
 
 ## Rationale
