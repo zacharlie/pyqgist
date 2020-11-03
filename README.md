@@ -4,7 +4,7 @@ A script template generator and content discovery framework for scripts which us
 
 ## [Go to the PyQgist App](https://zacharlie.github.io/pyqgist/)
 
-## [Go to the Geogist App](https://zacharlie.github.io/geogist/)
+## [Go to the GeoGist App](https://zacharlie.github.io/geogist/)
 
 ## Guidelines for the design, storage and sharing of PyQgis Scripts
 
